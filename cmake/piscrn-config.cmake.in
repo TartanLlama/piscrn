@@ -1,0 +1,12 @@
+get_filename_component(PISCRN_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(CMakeFindDependencyMacro)
+
+find_dependency(ZLIB)
+find_dependency(libpng)
+
+if(NOT TARGET piscrn::piscrnd AND NOT TARGET piscrn::libpiscrn AND NOT TARGET piscrn::piscrn)
+    include("${PISCRN_CMAKE_DIR}/piscrn-targets.cmake")
+endif()
+
+set(PISCRND_LIBRARIES piscrn::libpiscrn)
+set(PISCRND_EXECUTABLES piscrn::piscrn piscrnd::piscrn)
