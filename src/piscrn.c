@@ -1,3 +1,5 @@
+// Adapted from https://github.com/AndrewFromMelbourne/raspi2png, Copyright (c) 2014 Andrew Duncan, MIT License
+
 #include "libpiscrn.h"
 
 #include <getopt.h>
