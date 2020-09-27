@@ -15,7 +15,7 @@ void usage(void) {
   fprintf(stderr, "\n");
 
   fprintf(stderr, "    --pngname,-p - name of png file to create ");
-  fprintf(stderr, "(default is %s)\n", PISCRN_DEFAULT_NAME);
+  fprintf(stderr, "(default is %s)\n", "snapshot.png");
 
   fprintf(stderr, "    --height,-h - image height ");
   fprintf(stderr, "(default is screen height)\n");
@@ -27,10 +27,10 @@ void usage(void) {
   fprintf(stderr, "(0 - 9)\n");
 
   fprintf(stderr, "    --delay,-d - delay in seconds ");
-  fprintf(stderr, "(default %d)\n", PISCRN_DEFAULT_DELAY);
+  fprintf(stderr, "(default %d)\n", 0);
 
   fprintf(stderr, "    --display,-D - Raspberry Pi display number ");
-  fprintf(stderr, "(default %d)\n", PISCRN_DEFAULT_DISPLAY_NUMBER);
+  fprintf(stderr, "(default %d)\n", 0);
 
   fprintf(stderr, "    --stdout,-s - write file to stdout\n");
 

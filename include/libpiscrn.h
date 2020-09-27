@@ -1,10 +1,6 @@
 #ifndef PISCRN_H
 #define PISCRN_H
 
-#define PISCRN_DEFAULT_DELAY 0
-#define PISCRN_DEFAULT_DISPLAY_NUMBER 0
-#define PISCRN_DEFAULT_NAME "snapshot.png"
-
 #include <stdint.h>
 #include <stddef.h>
 

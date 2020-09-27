@@ -20,12 +20,12 @@
 #endif
 
 const piscrn_screenshot_params piscrn_default_params = {
-    .output = {.choice = PISCRN_OUTPUT_FILE, .fileName = PISCRN_DEFAULT_NAME},
+    .output = {.choice = PISCRN_OUTPUT_FILE, .fileName = "snapshot.png"},
     .displayNumber = 0,
     .compression = Z_DEFAULT_COMPRESSION,
     .requestedHeight = 0,
     .requestedWidth = 0,
-    .delay = PISCRN_DEFAULT_DELAY};
+    .delay = 0};
 
 //-----------------------------------------------------------------------
 
