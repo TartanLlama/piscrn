@@ -1,3 +1,5 @@
+// Adapted from https://github.com/AndrewFromMelbourne/raspi2png, Copyright (c) 2014 Andrew Duncan, MIT License
+
 #define _GNU_SOURCE
 
 #include "libpiscrn.h"
