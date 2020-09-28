@@ -45,6 +45,7 @@ void handle_request(struct http_request_s *request) {
   http_response_header(response, "Content-Type", "image/png");
   http_response_body(response, pngBuffer, pngSize);
   http_respond(request, response);
+  free(pngBuffer);
 }
 
 void usage(void) {
