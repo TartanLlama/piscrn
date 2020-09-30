@@ -1,4 +1,5 @@
-// Adapted from https://github.com/AndrewFromMelbourne/raspi2png, Copyright (c) 2014 Andrew Duncan, MIT License
+// Adapted from https://github.com/AndrewFromMelbourne/raspi2png, Copyright (c)
+// 2014 Andrew Duncan, MIT License
 
 #define _GNU_SOURCE
 
@@ -33,7 +34,8 @@ const piscrn_screenshot_params piscrn_default_params = {
 
 typedef struct {
   char *buffer;
-  size_t size;
+  size_t allocSize;
+  size_t imgSize;
 } piscrn_png_mem_ptr;
 
 // Used as a libpng writer callback
@@ -41,18 +43,17 @@ typedef struct {
 void piscrn_png_memory_write(png_structp png_ptr, png_bytep data,
                              png_size_t length) {
   piscrn_png_mem_ptr *p = (piscrn_png_mem_ptr *)png_get_io_ptr(png_ptr);
-  size_t nsize = p->size + length;
 
-  if (p->buffer)
-    p->buffer = realloc(p->buffer, nsize);
-  else
-    p->buffer = malloc(nsize);
+  if ((p->imgSize + length) > p->allocSize) {
+    p->allocSize *= 2;
+    p->buffer = realloc(p->buffer, p->allocSize);
 
-  if (!p->buffer)
-    png_error(png_ptr, "Write Error");
+    if (!p->buffer)
+      png_error(png_ptr, "Write Error");
+  }
 
-  memcpy(p->buffer + p->size, data, length);
-  p->size += length;
+  memcpy(p->buffer + p->imgSize, data, length);
+  p->imgSize += length;
 }
 
 piscrn_error_code
@@ -321,20 +322,24 @@ piscrn_take_screenshot(piscrn_screenshot_params const *params) {
 
     png_init_io(pngPtr, pngfp);
   } else if (params->output.choice == PISCRN_OUTPUT_MEMORY) {
-    pngmem.buffer = NULL;
-    pngmem.size = 0;
+    size_t min_png_size = 2 * 1024 * 1024; // 2MB
+    pngmem.buffer = malloc(min_png_size);
+    pngmem.allocSize = min_png_size;
+    pngmem.imgSize = 0;
 
     png_set_write_fn(pngPtr, &pngmem, piscrn_png_memory_write, NULL);
   }
 
-  png_set_IHDR(pngPtr, infoPtr, pngWidth, pngHeight, 8, PNG_COLOR_TYPE_RGB,
-               PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
-               PNG_FILTER_TYPE_BASE);
+  int bit_depth = 8;
+  png_set_IHDR(pngPtr, infoPtr, pngWidth, pngHeight, bit_depth,
+               PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+               PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
   if (params->compression != Z_DEFAULT_COMPRESSION) {
     png_set_compression_level(pngPtr, params->compression);
   }
 
+  png_set_filter(pngPtr, 0, PNG_FILTER_SUB);
   png_write_info(pngPtr, infoPtr);
 
   int y = 0;
@@ -351,7 +356,7 @@ piscrn_take_screenshot(piscrn_screenshot_params const *params) {
 
   if (params->output.choice == PISCRN_OUTPUT_MEMORY) {
     *params->output.memoryOut = pngmem.buffer;
-    *params->output.sizeOut = pngmem.size;
+    *params->output.sizeOut = pngmem.imgSize;
   }
   //-------------------------------------------------------------------
 

@@ -3,7 +3,8 @@
 #include "libpiscrn.h"
 #include <getopt.h>
 #include <stdbool.h>
-
+#include <stdio.h>
+#include <time.h>
 
 bool quietMode = false;
 #define LOG(...)                                                               \
@@ -16,6 +17,7 @@ char *http_request_ip(struct http_request_s *request) {
 
 void handle_request(struct http_request_s *request) {
   struct http_response_s *response = http_response_init();
+  http_request_connection(request, HTTP_CLOSE);
 
   // Respond with 404 if this is not a GET request for /screenshot
   http_string_t type = http_request_method(request);
@@ -36,13 +38,25 @@ void handle_request(struct http_request_s *request) {
   size_t pngSize;
   params.output.memoryOut = &pngBuffer;
   params.output.sizeOut = &pngSize;
+  params.compression = 1;
   piscrn_take_screenshot(&params);
 
+  // Create filename
+  time_t now;
+  time(&now);
+  char filename[sizeof "screenshot-1997-01-01T00:00:00Z.png"];
+  strftime(filename, sizeof filename, "screenshot-%FT%TZ.png", gmtime(&now));
+
   // Respond with the PNG
-  LOG("[%s] %.*s %.*s (200)\n", http_request_ip(request), type.len, type.buf,
-      target.len, target.buf);
+  LOG("[%s] %.*s %.*s (200, %s, %.2fMB)\n", http_request_ip(request), type.len,
+      type.buf, target.len, target.buf, filename, pngSize / 1024.0 / 1024.0);
   http_response_status(response, 200);
   http_response_header(response, "Content-Type", "image/png");
+  char contentDispositionFmt[] = "attachment; filename=\"%s\"";
+  char contentDisposition[sizeof contentDispositionFmt + sizeof filename];
+  snprintf(contentDisposition, sizeof contentDisposition, contentDispositionFmt,
+           filename);
+  http_response_header(response, "Content-Disposition", contentDisposition);
   http_response_body(response, pngBuffer, pngSize);
   http_respond(request, response);
   free(pngBuffer);
